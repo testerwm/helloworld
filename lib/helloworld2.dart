@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
             Icon(Icons.settings, color: Colors.purple),
             SizedBox(width: 40)
           ],
-          title: const Text('Welcome to Flutter',
+          title: const Text('Welcome to Flutter-왕명',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
