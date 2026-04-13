@@ -1,0 +1,71 @@
+from openai import OpenAI
+import json
+
+client = OpenAI()
+
+# 1️⃣ 定义一个工具（本地函数）
+def get_weather(city: str):
+    # 这里模拟 API
+    return {"city": city, "weather": "sunny", "temp": "15°C"}
+
+# 2️⃣ 把工具注册给模型（告诉它能用什么）
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get weather by city",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {"type": "string"}
+                },
+                "required": ["city"]
+            }
+        }
+    }
+]
+
+# 3️⃣ 用户输入
+messages = [
+    {"role": "user", "content": "What's the weather in Seoul?"}
+]
+
+# 4️⃣ 第一次调用 LLM
+response = client.chat.completions.create(
+    model="gpt-4.1",
+    messages=messages,
+    tools=tools
+)
+
+msg = response.choices[0].message
+
+# 5️⃣ 判断是否要调用工具
+if msg.tool_calls:
+    tool_call = msg.tool_calls[0]
+    name = tool_call.function.name
+    args = json.loads(tool_call.function.arguments)
+
+    # 6️⃣ 执行工具
+    if name == "get_weather":
+        result = get_weather(**args)
+
+    # 7️⃣ 把“工具结果”喂回模型
+    messages.append(msg)  # 模型刚才的“调用请求”
+    messages.append({
+        "role": "tool",
+        "tool_call_id": tool_call.id,
+        "content": json.dumps(result)
+    })
+
+    # 8️⃣ 第二次调用 LLM（生成最终答案）
+    final_response = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=messages
+    )
+
+    print(final_response.choices[0].message.content)
+
+else:
+    # 不需要工具，直接输出
+    print(msg.content)
