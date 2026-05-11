@@ -34,7 +34,7 @@ class _WeatherPageState extends State<WeatherPage> {
   String message = '도시 이름을 입력하고 날씨를 검색하세요.';
   bool isLoading = false;
 
-  final String apiKey = 'c62c0e536dd79c603802b6075053e21a';
+  final String apiKey = '여기에_API_KEY를_입력하세요';
 
   Future<void> getWeather() async {
     String city = cityController.text;
